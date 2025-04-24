@@ -1,0 +1,14 @@
+Area3D
+CollisionShape3D
+Control
+CenterContainer
+ProgressBar
+Polygon2D
+Node3D
+MeshInstance3D
+Path3D
+CSGPolygon3D
+CollisionPolygon3D
+CharacterBody3D
+RayCast3D
+OmniLight3D
