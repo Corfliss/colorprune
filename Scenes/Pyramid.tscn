@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://8q50dsp6talc"]
+
+[ext_resource type="Script" uid="uid://col1dpa0ln0wq" path="res://Scripts/pyramid_instance.gd" id="1_7eney"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_035ce"]
+points = PackedVector3Array(-1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0, 1, 0, 2, 0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_6hc48"]
+top_radius = 0.0
+bottom_radius = 0.25
+height = 1.5
+radial_segments = 4
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_6hc48"]
+height = 1.25
+radius = 0.25
+
+[node name="Pyramids" type="CharacterBody3D" groups=["enemy"]]
+script = ExtResource("1_7eney")
+
+[node name="Area3D" type="Area3D" parent="."]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Area3D"]
+shape = SubResource("ConvexPolygonShape3D_035ce")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("ConvexPolygonShape3D_035ce")
+
+[node name="CSGCylinder3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 1, -1)
+mesh = SubResource("CylinderMesh_6hc48")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="CSGCylinder3D"]
+transform = Transform3D(0.79, 0, 0, 0, 0.79, 0, 0, 0, 0.79, 0, 0.4, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CSGCylinder3D/StaticBody3D"]
+shape = SubResource("CylinderShape3D_6hc48")

@@ -76,17 +76,20 @@ extends CharacterBody3D
 ## Use the Input Map to map a mouse/keyboard input to an action
 ## and add a reference to it to this dictionary to be used in the script.
 @export var controls : Dictionary = {
-	LEFT = "ui_left",
-	RIGHT = "ui_right",
-	FORWARD = "ui_up",
-	BACKWARD = "ui_down",
+	LEFT = "move_left",
+	RIGHT = "move_right",
+	FORWARD = "move_forward",
+	BACKWARD = "move_backward",
 	JUMP = "ui_accept",
 	CROUCH = "crouch",
 	SPRINT = "sprint",
 	PAUSE = "ui_cancel",
 	SWITCH_RIGHT = "switch_right",
 	SWITCH_LEFT = "switch_left",
-	SHOOT = "shoot"
+	SHOOT = "shoot",
+	SHOOT_ALT = "shoot_alt",
+	WEAPON_TOGGLE_BUTTON = "weapon_toggle_button",
+	WEAPON_HOLD_BUTTON = "weapon_hold_button"
 	}
 @export_subgroup("Controller Specific")
 ## This only affects how the camera is handled, 
@@ -179,10 +182,13 @@ var mouseInput : Vector2 = Vector2(0,0)
 # Get the gravity from the project settings to be synced with RigidBody nodes
 # Don't set this as a const, see the gravity section in _physics_process
 var gravity : float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var queued_input_fire: Dictionary = {}
+signal died
 #endregion
 
 #region Main Control Flow
 func _ready():
+
 
 	# It is safe to comment this line if your game doesn't 
 	# start with the mouse captured
@@ -249,6 +255,9 @@ func _physics_process(delta):
 	# To handle weapon switch
 	handle_weapons_switch()
 
+	# To handle shooting
+	handle_shooting()
+	
 	# The player is not able to stand up if the ceiling is too low
 	low_ceiling = $CrouchCeilingDetection.is_colliding()
 
@@ -420,6 +429,85 @@ func handle_flying(delta):
 #
 	#move_and_slide()
 
+func handle_shooting():
+	var shoot := Input.is_action_just_pressed("shoot")
+	var shoot_alt := Input.is_action_just_pressed("shoot_alt")
+	var shoot_hold := Input.is_action_pressed("shoot")
+	var shoot_alt_hold := Input.is_action_pressed("shoot_alt")
+
+	# Determine weapon type
+	var is_green := weapon_state == 2
+	var is_holding := shoot_hold or shoot_alt_hold
+	var is_tap := shoot or shoot_alt
+	
+	# Update input dictionary when tap or green hold is active
+	if is_tap or (is_green and is_holding):
+		queued_input_fire = {
+			"shoot": shoot,
+			"shoot_alt": shoot_alt,
+			"shoot_hold": shoot_hold,
+			"shoot_alt_hold": shoot_alt_hold,
+			"weapon_toggle_button": Input.is_action_pressed("weapon_toggle_button"),
+			"weapon_hold_button": Input.is_action_pressed("weapon_hold_button"),
+			"weapon_state": weapon_state
+		}
+
+	# Shoot logic: tap or green hold
+	if queued_input_fire.size() > 0:
+		if is_tap or (is_green and is_holding):
+			WEAPONS.shoot(queued_input_fire)
+
+		# Stop spraying when not holding anymore
+		if is_green and not is_holding:
+			queued_input_fire = {}
+		elif not is_green:
+			queued_input_fire = {}
+
+	#var shoot_just_pressed = Input.is_action_just_pressed("shoot")
+	#var shoot_alt_just_pressed = Input.is_action_just_pressed("shoot_alt")
+	#var shoot_hold = Input.is_action_pressed("shoot")
+	#var shoot_alt_hold = Input.is_action_pressed("shoot_alt")
+#
+	## New input dictionary only if there's a tap
+	#if shoot_just_pressed or shoot_alt_just_pressed:
+		#queued_input_fire = {
+			#"shoot": shoot_just_pressed,
+			#"shoot_alt": shoot_alt_just_pressed,
+			#"shoot_hold": shoot_hold,
+			#"shoot_alt_hold": shoot_alt_hold,
+			#"weapon_toggle_button": Input.is_action_pressed("weapon_toggle_button"),
+			#"weapon_hold_button": Input.is_action_pressed("weapon_hold_button"),
+			#"weapon_state": weapon_state
+		#}
+#
+	## Handle shooting execution
+	#if queued_input_fire.size() > 0:
+		#var is_hold_weapon = queued_input_fire.weapon_state == 2 # green
+		#var holding = queued_input_fire.get("shoot_hold", false) or queued_input_fire.get("shoot_alt_hold", false)
+#
+		## Fire if it's a tap, or if holding and it's a hold weapon
+		#if queued_input_fire.get("shoot") or queued_input_fire.get("shoot_alt") or (is_hold_weapon and holding):
+			#WEAPONS.shoot(queued_input_fire)
+#
+		## Clear only if no hold is active
+		#if not (is_hold_weapon and holding):
+			#queued_input_fire = {}
+
+#func handle_shooting():
+	#var shoot_just_pressed = Input.is_action_just_pressed("shoot")
+	#var shoot_alt_just_pressed = Input.is_action_just_pressed("shoot_alt")
+#
+	#if shoot_just_pressed or shoot_alt_just_pressed:
+		#queued_input_fire = {
+			#"shoot": shoot_just_pressed,
+			#"shoot_alt": shoot_alt_just_pressed,
+			#"shoot_hold": Input.is_action_pressed("shoot"),
+			#"shoot_alt_hold": Input.is_action_pressed("shoot_alt"),
+			#"weapon_toggle_button": Input.is_action_pressed("weapon_toggle_button"),
+			#"weapon_hold_button": Input.is_action_pressed("weapon_hold_button"),
+			#"weapon_state": weapon_state
+		#}
+
 func check_controls():
 	var control_checks = {
 		controls.JUMP: ["No control mapped for jumping. 
@@ -446,15 +534,24 @@ func check_controls():
 		controls.SPRINT: ["No control mapped for sprint. 
 			Please add an input map control. Disabling sprinting.", 
 			"sprint_enabled", false],
-		controls.SWITCH_RIGHT: ["No control mapped for switch right 
+		controls.SWITCH_RIGHT: ["No control mapped for switch right. 
 			Please add an input map control. Disabling weapon switch.", 
 			"weapon_switch", false],
-		controls.SWITCH_LEFT: ["No control mapped for switch left
+		controls.SWITCH_LEFT: ["No control mapped for switch left.
 			Please add an input map control. Disabling weapon switch.", 
 			"weapon_switch", false],
-		controls.SHOOT: ["No control mapped for shoot 
+		controls.SHOOT: ["No control mapped for shoot. 
 			Please add an input map control. Disabling shooting.", 
-			"can_shoot", false]
+			"can_shoot", false],
+		controls.SHOOT_ALT: ["No control mapped for alt shooting. 
+			Please add an input map control. Disabling shooting.", 
+			"can_shoot", false],
+		controls.WEAPON_TOGGLE_BUTTON: ["No control mapped for system 
+			toggle mode. Please add an input map control. 
+			Disabling system mode.", "system_mode", false],
+		controls.WEAPON_HOLD_BUTTON: ["No control mapped for system 
+			hold mode. Please add an input map control.
+			Disabling system mode.", "system_mode", false]
 	}
 
 	# Check for error of input for each of the control input
@@ -634,15 +731,18 @@ func handle_pausing():
 	Input.mouse_mode = mode_map.get(Input.mouse_mode, Input.MOUSE_MODE_VISIBLE)
 	#get_tree().paused = false
 
-func _input(event):
-	if event.is_action_pressed(controls.SHOOT) and weapon_state == Weapons.PISTOL:
-		$Head/Weapons/WeaponPistol.shoot()
-
 func _unhandled_input(event : InputEvent):
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		mouseInput.x += event.relative.x
 		mouseInput.y += event.relative.y
 #endregion
+
+#func _input(event):
+	#if event.is_action_pressed("ui_accept"):
+		#var projectile = preload("res://Scenes/BoxProjectile.tscn").instantiate()
+		#add_child(projectile)
+		#projectile.global_transform.origin = Vector3(0, 2, -5)
+		#projectile.apply_impulse(Vector3(0, 0, 1) * 15)
 
 #region Health
 func take_damage(amount: int) -> void:
@@ -657,7 +757,9 @@ func update_health_ui() -> void:
 		health_bar.value = current_health
 
 func die():
+	queue_free()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE 
 	print("Character is dead")
-	# Play death animation, respawn, etc.
-	get_tree().quit()
+	emit_signal("died")
+
 #endregion

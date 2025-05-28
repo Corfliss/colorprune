@@ -1,9 +1,13 @@
-[gd_scene load_steps=43 format=4 uid="uid://bvncr44h7klfq"]
+[gd_scene load_steps=47 format=4 uid="uid://bvncr44h7klfq"]
 
 [ext_resource type="Script" uid="uid://bp56nhc2tnpkk" path="res://Scripts/character.gd" id="1_oolk3"]
 [ext_resource type="Material" uid="uid://bo6ktvbouxnbe" path="res://Assets/low_poly_weapons/green.tres" id="2_lcuhw"]
-[ext_resource type="Script" uid="uid://ckbajuqdpp1oj" path="res://Scripts/pistol.gd" id="2_v7dgu"]
+[ext_resource type="Script" uid="uid://ckbajuqdpp1oj" path="res://Scripts/weapons.gd" id="2_v7dgu"]
+[ext_resource type="AudioStream" uid="uid://csg2a6jldxc5x" path="res://Assets/BluePistolShoot.wav" id="3_4b18b"]
 [ext_resource type="Material" uid="uid://c2fa4xi4a30hs" path="res://Assets/low_poly_weapons/white.tres" id="3_atbvg"]
+[ext_resource type="AudioStream" uid="uid://sjxuwevjuavu" path="res://Assets/RedShotgunShoot.wav" id="4_peemv"]
+[ext_resource type="AudioStream" uid="uid://dxj5oj1nngmol" path="res://Assets/GreenRifleShoot.wav" id="7_omicx"]
+[ext_resource type="AudioStream" uid="uid://bordxmceap1yb" path="res://Assets/BGMMainMenuCut.wav" id="8_peemv"]
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_oolk3"]
 
@@ -567,6 +571,7 @@ _data = {
 [sub_resource type="SphereShape3D" id="SphereShape3D_atbvg"]
 
 [node name="Character" type="CharacterBody3D" node_paths=PackedStringArray("HEAD", "CAMERA", "HEADBOB_ANIMATION", "JUMP_ANIMATION", "CROUCH_ANIMATION", "COLLISION_MESH", "WEAPONS", "health_bar", "HEAD_RAYCAST", "LEG_RAYCAST") groups=["player"]]
+collision_mask = 2
 script = ExtResource("1_oolk3")
 speed_base = 6.0
 speed_sprint = 12.0
@@ -581,23 +586,9 @@ WEAPONS = NodePath("Head/Weapons")
 health_bar = NodePath("UserInterface/HealthBar")
 HEAD_RAYCAST = NodePath("HeadDetection")
 LEG_RAYCAST = NodePath("LegDetection")
-controls = {
-&"BACKWARD": "move_backward",
-&"CROUCH": "crouch",
-&"FORWARD": "move_forward",
-&"JUMP": "ui_accept",
-&"LEFT": "move_left",
-&"PAUSE": "ui_cancel",
-&"RIGHT": "move_right",
-&"SHOOT": "shoot",
-&"SPRINT": "sprint",
-&"SWITCH_LEFT": "switch_left",
-&"SWITCH_RIGHT": "switch_right"
-}
 view_bobbing = false
 jump_animation = false
 ledge_grab = false
-weapon_switch = false
 is_flying = false
 
 [node name="Mesh" type="MeshInstance3D" parent="."]
@@ -621,25 +612,29 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 unique_name_in_owner = true
 target_position = Vector3(0, 0, -100)
 
-[node name="Weapons" type="Node3D" parent="Head"]
+[node name="Weapons" type="Node3D" parent="Head" node_paths=PackedStringArray("aim_raycast")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.222, 0, 0)
+script = ExtResource("2_v7dgu")
+aim_raycast = NodePath("../AimRayCast")
 
 [node name="WeaponPistol" type="Node3D" parent="Head/Weapons"]
 transform = Transform3D(0.0076385, 0, 0, 0, 0.0200935, 0, 0, 0, 0.0200935, 0, -0.156, -0.424)
-script = ExtResource("2_v7dgu")
 
 [node name="Weapon_04_White_0" type="MeshInstance3D" parent="Head/Weapons/WeaponPistol"]
 mesh = SubResource("ArrayMesh_atbvg")
 skeleton = NodePath("")
 
-[node name="Weapon_04_Blue_0" type="MeshInstance3D" parent="Head/Weapons/WeaponPistol"]
+[node name="WeaponBlue" type="MeshInstance3D" parent="Head/Weapons/WeaponPistol"]
 mesh = SubResource("ArrayMesh_5gddd")
 skeleton = NodePath("")
+
+[node name="BluePistolShoot" type="AudioStreamPlayer" parent="Head/Weapons/WeaponPistol"]
+stream = ExtResource("3_4b18b")
 
 [node name="WeaponShotgun" type="Node3D" parent="Head/Weapons"]
 transform = Transform3D(0.0121282, 0, 0, 0, -0.0247904, 0.0429382, 0, -0.0429382, -0.0247904, 0, -0.567, 0.576)
 
-[node name="Weapon_07_Black_0" type="MeshInstance3D" parent="Head/Weapons/WeaponShotgun"]
+[node name="WeaponRed" type="MeshInstance3D" parent="Head/Weapons/WeaponShotgun"]
 mesh = SubResource("ArrayMesh_b014i")
 skeleton = NodePath("")
 
@@ -651,10 +646,13 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_i2jby")
 skeleton = NodePath("")
 
+[node name="RedShotgunShoot" type="AudioStreamPlayer" parent="Head/Weapons/WeaponShotgun"]
+stream = ExtResource("4_peemv")
+
 [node name="WeaponRifle" type="Node3D" parent="Head/Weapons"]
 transform = Transform3D(0.0159675, 0, 0, 0, -0.0170156, -0.0294719, 0, 0.0294719, -0.0170156, 0, 0.428, 0.055)
 
-[node name="Weapon_03_Green_0" type="MeshInstance3D" parent="Head/Weapons/WeaponRifle"]
+[node name="WeaponGreen" type="MeshInstance3D" parent="Head/Weapons/WeaponRifle"]
 mesh = SubResource("ArrayMesh_oolk3")
 skeleton = NodePath("")
 
@@ -666,8 +664,15 @@ skeleton = NodePath("")
 mesh = SubResource("ArrayMesh_lcuhw")
 skeleton = NodePath("")
 
+[node name="GreenRifleShoot" type="AudioStreamPlayer" parent="Head/Weapons/WeaponRifle"]
+stream = ExtResource("7_omicx")
+
 [node name="Camera" type="Camera3D" parent="Head"]
 transform = Transform3D(0.142857, 0, 0, 0, 0.142857, 0, 0, 0, 0.142857, 0, 0, -0.00308111)
+
+[node name="EnemyHit" type="AudioStreamPlayer" parent="Head"]
+unique_name_in_owner = true
+stream = ExtResource("8_peemv")
 
 [node name="HeadbobAnimation" type="AnimationPlayer" parent="Head"]
 libraries = {
@@ -696,6 +701,7 @@ visible = false
 target_position = Vector3(0, 0, -1.5)
 
 [node name="Reticle" type="Control" parent="."]
+visible = false
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -706,6 +712,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="UserInterface" type="Control" parent="."]
+visible = false
 layout_mode = 3
 anchors_preset = 4
 anchor_top = 0.5
@@ -715,6 +722,7 @@ offset_bottom = -450.0
 grow_vertical = 2
 
 [node name="HealthBar" type="ProgressBar" parent="UserInterface"]
+visible = false
 layout_mode = 0
 offset_left = 17.0
 offset_top = 17.0

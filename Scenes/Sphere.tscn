@@ -1,0 +1,26 @@
+[gd_scene load_steps=3 format=3 uid="uid://83ahr44sgo1t"]
+
+[ext_resource type="Script" uid="uid://dsik6dh7w1w34" path="res://Scripts/sphere_instance.gd" id="1_ge60g"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ge60g"]
+radius = 1.0
+
+[node name="Sphere" type="CharacterBody3D" groups=["enemy"]]
+script = ExtResource("1_ge60g")
+
+[node name="Body" type="CSGSphere3D" parent="."]
+radius = 1.0
+radial_segments = 16
+rings = 8
+
+[node name="Muzzle" type="CSGBox3D" parent="."]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, -0.75)
+size = Vector3(1.5, 0.25, 0.25)
+
+[node name="SniperRay" type="RayCast3D" parent="Muzzle"]
+target_position = Vector3(0, 0, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_ge60g")
+
+[node name="LaserMesh" type="MeshInstance3D" parent="."]

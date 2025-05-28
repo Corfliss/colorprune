@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://c4h2amqi4ssas"]
+
+[ext_resource type="Shader" uid="uid://baorya37mn25u" path="res://Scenes/diagonal_crt_shader.gdshader" id="1_jp70a"]
+
+[resource]
+shader = ExtResource("1_jp70a")
+shader_parameter/time = 0.0
+shader_parameter/band_width = 0.865
+shader_parameter/block_repeat = 10.0

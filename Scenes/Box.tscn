@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3 uid="uid://hrg4b36a6q7m"]
+
+[ext_resource type="Script" uid="uid://c04ivu25surkc" path="res://Scripts/box_instance.gd" id="1_8s0t8"]
+[ext_resource type="PackedScene" uid="uid://baeo7cjl2jx6e" path="res://Scenes/BoxProjectile.tscn" id="2_42nxc"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_8s0t8"]
+top_radius = 0.25
+bottom_radius = 0.25
+height = 1.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_42nxc"]
+size = Vector3(2, 2, 2)
+
+[node name="Box" type="CharacterBody3D" groups=["enemy"]]
+script = ExtResource("1_8s0t8")
+cannonball_scene = ExtResource("2_42nxc")
+
+[node name="Muzzle" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 1, -1)
+mesh = SubResource("CylinderMesh_8s0t8")
+
+[node name="Box" type="CSGBox3D" parent="."]
+size = Vector3(2, 2, 2)
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_42nxc")

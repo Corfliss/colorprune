@@ -3,7 +3,9 @@ extends Node3D
 #region Nodes Export Group
 @export_group("Nodes")
 ## For instantiating the blue enemies to spawn
-@export var enemy_blue : PackedScene
+@export var pyramid : PackedScene
+@export var box : PackedScene
+@export var sphere : PackedScene
 ## For getting the level nodes
 @export var level : Node3D
 ## Character to be played with
@@ -16,7 +18,7 @@ extends Node3D
 @export var spawn_interval : float = 1.0
 ## Caps the number of enemies appearing at once
 ## We don't want a performance issue
-@export var max_enemies : int = 10000
+@export var max_enemies : int = 100
 ## Maximum attempts to find a valid spawn position
 @export var max_spawn_attempts : int = 10
 ## Minimum range to spawn the enemies
@@ -40,12 +42,20 @@ var ground_radius : int = 0
 var camera : Camera3D
 # Game time duration
 var game_time : float = 0.0
-
+# For spawn elevation
+var spawn_elevation: int = 5
+# How long you survive
+var time: float = 0.0
 #endregion
 
 func _ready() -> void:
+	#randomize everything
+	randomize()
+	character.connect("died", _on_player_died)
 	ground_radius = level.get_node("Ground").radius
 	camera = character.get_node("Head/Camera")
+	Global.play_layer()
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(_delta: float) -> void:
@@ -109,8 +119,18 @@ func spawn_enemy_visible() -> bool:
 				screen_pos.y > 0 and screen_pos.y < camera.get_viewport().size.y:
 				
 				# Spawn the enemy
-				var enemy = enemy_blue.instantiate()
-				enemy.transform.origin = result.position
+				var enemy_type = randi() % 3
+				var enemy
+				match enemy_type:
+					0: enemy = pyramid.instantiate()
+					1: enemy = box.instantiate()
+					2: enemy = sphere.instantiate()
+
+				if enemy_type == 0:
+					enemy.transform.origin = result.position
+				else:
+					enemy.transform.origin = result.position + Vector3.UP * spawn_elevation
+					
 				add_child(enemy)
 				return true
 	
@@ -121,3 +141,21 @@ func spawn_enemy_visible() -> bool:
 func hurt_character(amount: int):
 	if character and character.is_inside_tree():
 		character.take_damage(amount)
+		
+func _process(_delta):
+	time += _delta
+	var world_env: WorldEnvironment = $"../WorldEnvironment"
+	var env: Environment = world_env.environment
+	var sky: Sky = env.sky
+	
+	if sky and sky is Sky:
+		var mat = sky.sky_material
+		if mat:
+			mat.set_shader_parameter("time", time)
+
+func _on_player_died():
+	Global.layer_player.stop()
+	Global.score = time
+	time = 0.0
+	get_tree().call_deferred("change_scene_to_file", "res://Scenes/GameOver.tscn")
+	

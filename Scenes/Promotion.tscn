@@ -1,0 +1,77 @@
+[gd_scene load_steps=7 format=3 uid="uid://dbchoyqwx8po4"]
+
+[ext_resource type="Script" uid="uid://rmivjvuohvyh" path="res://Scenes/game_over.gd" id="1_r7w2m"]
+[ext_resource type="Material" uid="uid://c4h2amqi4ssas" path="res://Scenes/diagonal_crt_shader.tres" id="2_cro62"]
+[ext_resource type="Script" uid="uid://dhjy5vx0dtimp" path="res://Scenes/DiagonalGlow.gd" id="3_dph3u"]
+[ext_resource type="Texture2D" uid="uid://dwbouddlhg324" path="res://Assets/Colorprune.svg" id="4_r7w2m"]
+[ext_resource type="Texture2D" uid="uid://cd5mg4mxulu4k" path="res://Assets/arrow-big-left.svg" id="5_e7put"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_5mu6e"]
+line_spacing = 12.0
+font_size = 132
+
+[node name="GameOver" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r7w2m")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+texture_filter = 2
+texture_repeat = 1
+material = ExtResource("2_cro62")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_dph3u")
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -206.0
+offset_right = 207.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="VBoxContainer2"]
+visible = false
+layout_mode = 2
+texture = ExtResource("4_r7w2m")
+expand_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="VBoxContainer2"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+text = "Out now"
+label_settings = SubResource("LabelSettings_5mu6e")
+horizontal_alignment = 1
+vertical_alignment = 1
+uppercase = true
+
+[node name="BackButton" type="Button" parent="VBoxContainer2"]
+unique_name_in_owner = true
+visible = false
+layout_direction = 3
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+icon = ExtResource("5_e7put")
+flat = true
+
+[node name="Label" type="Label" parent="VBoxContainer2"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 96
+text = "SURVIVE"
+horizontal_alignment = 1
