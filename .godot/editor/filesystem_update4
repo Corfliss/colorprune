@@ -1,0 +1,6 @@
+res://Scenes/Sphere.tscn
+res://Scenes/skybox_crt.gdshader
+res://Scenes/diagonal_crt_shader.gdshader
+res://Scenes/diagonal_crt_shader.tres
+res://addons/vaporwavesky/vaporwave.gdshader
+res://addons/hologram/hologram.gdshader

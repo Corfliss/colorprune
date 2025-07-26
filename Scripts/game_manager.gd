@@ -24,7 +24,7 @@ extends Node3D
 ## Minimum range to spawn the enemies
 @export var spawn_minimum_range : float = 7.5
 ## Maximum play time
-@export var difficulty_ramp_duration : float = 60.0
+@export var difficulty_ramp_duration : float = 300.0
 ## For starting spawn interval_start
 @export var spawn_interval_start : float = 2.0
 ## For what is the fastest spawn time

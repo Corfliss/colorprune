@@ -10,6 +10,7 @@ var enemy_color_code: int = mat_dict["color_id"]
 
 func _ready():
 	$Area3D.body_entered.connect(_on_body_entered)
+	$CSGCylinder3D/Area3D.body_entered.connect(_on_body_entered_2)
 
 	create_pyramid_mesh()
 	var players = get_tree().get_nodes_in_group("player")
@@ -59,6 +60,11 @@ func _physics_process(_delta):
 	move_and_slide()
 
 func _on_body_entered(body):
+	if body.is_in_group("player"):
+		print("Character touched the pyramid!")
+		body.take_damage(10)  # If your character has a take_damage function
+
+func _on_body_entered_2(body):
 	if body.is_in_group("player"):
 		print("Character touched the pyramid!")
 		body.take_damage(10)  # If your character has a take_damage function
